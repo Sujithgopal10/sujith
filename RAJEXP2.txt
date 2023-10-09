@@ -1,0 +1,58 @@
+PRG 2------------------------
+
+create table Salesman(
+Salesman_ID int primary key,
+Name varchar(20),
+City varchar(20),
+Commission varchar(20));
+
+Create table Customer(Customer_ID int primary key,
+Cust_Name varchar(20),
+City varchar(20), 
+Grade int, 
+Salesman_ID references Salesman(Salesman_ID) on delete set null);
+
+create table Orders(Ord_No int primary key, 
+Purchase_Amt Number,
+Ord_Date date, 
+Customer_ID references Customer(Customer_ID) on delete set null, 
+Salesman_ID references Salesman(Salesman_ID) on delete set null);
+
+insert into Salesman values(2000,'Ravi','Bangalore','20%');
+insert into Salesman values(3000,'Kumar','Mysore','15%');
+insert into Salesman values(4000,'Smith','Delhi','30%');
+insert into Salesman values(5000,'Harsha','Hydrabad','15%');
+
+insert into Customer values(10,'Preethi','Bangalore',100,1000);
+insert into Customer values(11,'Vivek','Mangalore',300,1000);
+insert into Customer values(12,'Basker','Chennai',400,2000);
+insert into Customer values(13,'Chethan','Bangalore',200,2000);
+insert into Customer values(14,'Mamatha','Bangalore',400,3000);
+
+insert into Orders values(50,5000,'04-MAY-17',10,1000);
+insert into Orders values(51,450,'20-JAN-17',10,2000);
+insert into Orders values(52,1000,'20-JAN-17',13,2000);
+insert into Orders values(53,3500,'13-APR-17',14,3000);
+insert into Orders values(54,350,'09-MAR-17',12,2000);
+
+
+select count(*) from Customer where Grade > (select avg(Grade) from Customer where city =
+'Bangalore');
+
+select Salesman_ID, Name from Salesman S having
+(select count(*) from Customer where Salesman_ID=S.Salesman_ID) > 1 group by Name,
+Salesman_ID;
+
+select Salesman.Salesman_ID,Name,Cust_Name from Salesman,Customer
+where Salesman.City=Customer.City
+Union
+select Salesman.Salesman_ID,Name,'No-Match'
+from Salesman where not City=any (select City from Customer);
+
+
+create view salesman_order as select b.Ord_Date, a.Salesman_ID,Name
+from Salesman a, Orders B where A.Salesman_ID=b.Salesman_ID and b.Purchase_Amt=
+(select max(Purchase_Amt) from Orders C where C.Ord_Date=b.Ord_Date);
+
+
+delete from Salesman where Salesman_ID=1000;
